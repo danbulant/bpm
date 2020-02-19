@@ -28,6 +28,9 @@ var colors = {
 
 class CustomConsole {
     colors = colors;
+
+    width = process.stdout.columns | 999;
+    height = process.stdout.rows | 999;
     output(...args) {
         console.log(...args);
     }
