@@ -1,8 +1,11 @@
 const fs = require("fs");
+const path = require("path");
 const request = require("./requests");
 const Console = require("./console");
 const console = new Console;
 const REPO = "https://registry.npmjs.org/";
+const Parser = require("./parser");
+var parser = new Parser;
 
 module.exports = class Package {
     pkg = {};
@@ -25,9 +28,9 @@ module.exports = class Package {
         return new Promise((res, rej) => {
             if(!pkg){
                 if(!fs.existsSync("./package.json"))return rej("There's no package.json in this directory.");
-                var js = this.load("./package.json");
+                var js = parser.load("./package.json");
                 if(!js.name)return rej("Package.json doesn't contain name property, which is required for this command to work");
-                pkg = js.name;
+                pkg = parser.getName();
             }
 
             request(REPO + pkg + "/").then((r) => {
@@ -71,5 +74,42 @@ module.exports = class Package {
                 rej(e);
             })
         });
+    }
+    ping(){
+        return new Promise((res, rej) => {
+            console.log(console.colors.FgMagenta + "HTTP PING" + console.colors.Reset + " " + REPO);
+            const t = process.hrtime();
+            const NS_PER_SEC = 1e9;
+            request(REPO).catch().then(()=>{
+                var diff = process.hrtime(t);
+                var time = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC * 1000;
+                console.log(console.colors.FgMagenta + "HTTP PONG" + console.colors.Reset + " " + time + "ms");
+                res();
+            })
+        })
+    }
+
+    init(){
+        if(fs.existsSync(process.cwd() + "/package.json")){
+            return console.error("Package.json already exists, cannot continue");
+        }
+        console.log("Creating default package.json");
+
+        var pkg = {
+            name: process.cwd().split(path.sep).pop(),
+            version: "1.0.0",
+            description: "",
+            main: "index.js",
+            scripts: {
+                start: "node index.js",
+                test: "echo \"No test specified!\""
+            },
+            keywords: [],
+            author: "",
+            license: "ISC"
+        }
+        var data = JSON.stringify(pkg, null, 2);
+        fs.writeFileSync(process.cwd() + "/package.json", data);
+        console.log("Done");
     }
 }

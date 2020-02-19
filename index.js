@@ -11,7 +11,7 @@ process.on('uncaughtException', function (err) {
 });
 
 process.on('unhandledRejection', function (reason, p) {
-    console.warn("Possibly Unhandled Rejection, reason: ", reason);
+    console.warn("Possibly Unhandled Rejection, reason:", reason);
 });
 
 if(!args.contents[0]){
@@ -27,11 +27,16 @@ switch(args.contents[0]){
     case "bin":
         console.log(__dirname);
         break;
+    case "ping":
+        pkg.ping();
+        break;
+    case "init":
+        pkg.init();
+        break;
     case "i":
     case "install":
     case "ls":
     case "help":
-    case "ping":
     case "adduser":
     case "audit":
     case "bugs":
@@ -48,7 +53,6 @@ switch(args.contents[0]){
     case "explore":
     case "help-search":
     case "hook":
-    case "init":
     case "install-ci-test":
     case "install-test":
     case "link":
