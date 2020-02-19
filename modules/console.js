@@ -31,6 +31,40 @@ class CustomConsole {
 
     width = process.stdout.columns | 999;
     height = process.stdout.rows | 999;
+
+    outputArray(arr, empty = "None") {
+        if(!Array.isArray(arr))throw Error("Cannot convert non-array to array");
+
+        if(!arr.length)return console.log(empty);
+
+        var maxWidth = 0;
+        arr.forEach(a => {
+            var stripped = a.replace(/\x1b\[[0-9]{1,2}m/gi, "");
+            if(stripped.length + 1 > maxWidth)maxWidth = stripped.length + 1;
+        });
+
+        var width = Math.floor(maxWidth / this.width);
+        var pt = 0;
+        var collumn = 0;
+        var lines = [];
+        arr.forEach(a => {
+            var stripped = a.replace(/\x1b\[[0-9]{1,2}m/gi, "");
+            if(lines[pt]){
+                lines[pt] += " " + a + " ".repeat(maxWidth - stripped.length);
+            } else {
+                lines[pt] = a + " ".repeat(maxWidth - stripped.length);
+            }
+            if(collumn > width){
+                collumn = 0;
+                pt++;
+                return;
+            }
+            collumn++;
+        });
+
+        //console.log(lines);
+        lines.forEach((a) => console.log(a));
+    }
     output(...args) {
         console.log(...args);
     }
