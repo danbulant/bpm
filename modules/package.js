@@ -10,20 +10,6 @@ var parser = new Parser;
 module.exports = class Package {
     pkg = {};
 
-    load(path){
-        if(!fs.existsSync(path))throw Error("Path doesn't exists!");
-
-        try {
-            var json = JSON.parse(fs.readFileSync(path));
-        } catch(e){
-            throw Error("Invalid JSON file");
-        }
-
-        this.pkg = json;
-
-        return json;
-    }
-
     get(pkg){
         return new Promise((res, rej) => {
             if(!pkg){
