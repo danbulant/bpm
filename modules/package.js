@@ -23,7 +23,12 @@ module.exports = class Package {
 
     get(pkg){
         return new Promise((res, rej) => {
-            if(!pkg)return rej("No package name given");
+            if(!pkg){
+                if(!fs.existsSync("./package.json"))return rej("There's no package.json in this directory.");
+                var js = this.load("./package.json");
+                if(!js.name)return rej("Package.json doesn't contain name property, which is required for this command to work");
+                pkg = js.name;
+            }
 
             request(REPO + pkg + "/").then((r) => {
                 var o = JSON.parse(r);
@@ -35,24 +40,29 @@ module.exports = class Package {
                 var magenta = console.colors.FgMagenta;
                 var yellow = console.colors.FgYellow;
                 var reset = console.colors.Reset;
-                
+                var red = console.colors.FgRed;
+
                 var length = 0;
                 var dependencies = [];
                 for (var dependency in o.versions[o["dist-tags"].latest].dependencies){
-                    dependencies[length] = yellow + dependency + reset + "@" + magenta + o.versions[o["dist-tags"].latest].dependencies[dependency] + reset;
+                    dependencies[length] = cyan + dependency + reset + "@" + magenta + o.versions[o["dist-tags"].latest].dependencies[dependency] + reset;
                     length++;
                 };
 
-                console.output("\n" + cyan + o.name + reset + " | " + magenta + o.license + reset + " | dependencies: " + cyan + (length) +  reset);
-                console.output(o.description);
-                console.output(yellow + o.homepage + reset);
+                console.output("\n" + cyan + o.name + reset + " | " + magenta + (o.license || reset + red + "Proprietary") + reset + " | dependencies: " + cyan + (length) +  reset);
+                if(o.description) console.output(o.description);
+                if(o.homepage) console.output(yellow + o.homepage + reset);
                 console.output("");
-                console.output("Latest release: " + cyan + o["dist-tags"].latest + reset);
+                if(o["dist-tags"])if(o["dist-tags"].latest) console.output("Latest release: " + cyan + o["dist-tags"].latest + reset);
                 
                 console.output(yellow + "\nMaintainers:" + reset);
                 o.maintainers.forEach(m => {
                     console.output(" -" + cyan + m.name + " " + magenta + m.email + reset);
                 })
+
+                console.output("");
+                console.output(yellow + "Dependencies:" + reset);
+                console.outputArray(dependencies);
 
                 console.output("");
                 res();
