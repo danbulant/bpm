@@ -15,6 +15,10 @@ BPM on the other hand, stores all packages in one place and also saves a file to
 
 This means, that it can save much space - some apps use same depndencies and same versions, so they will be merged.
 
+## BPM create node_modules. Is it normal?
+
+Yes! Because of how node works, BPM needs to create the directory, but instead of pasting the dependencies there, it creates a symlink pointing to the actual version.
+
 ## Commands
 
 BPM is aimed to fully **replace** NPM, *but*, as of now, it cannot.
@@ -25,3 +29,8 @@ Currently supported and working commands are:
 * `bin` - Shows installation path of BPM
 * `ping` - Does HTTP ping to NPM's registry. Note this is different from NPM ping, so it cannot be compared.
 * `init` - Creates a default `package.json` in current working directory.
+
+
+## Hide package.json warnings
+
+Use the flag `--supressChecking` or `-sch` for short.
