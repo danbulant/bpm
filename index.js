@@ -21,6 +21,7 @@ if(!args.contents[0]){
 switch(args.contents[0]){
     case "get":
     case "info":
+    case "view":
         pkg.get(args.contents[1]).catch(console.error);
         break;
     case "bin":
