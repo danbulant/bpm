@@ -5,22 +5,29 @@ var console = new Console;
 var pkg = new Package;
 const VERSION = "0.1"
 
+process.on('uncaughtException', function (err) {
+    console.error("Uncaught exception:", err.message);
+    console.error(err.stack);
+});
+
+process.on('unhandledRejection', function (reason, p) {
+    console.warn("Possibly Unhandled Rejection, reason: ", reason);
+});
+
 if(!args.contents[0]){
     return console.output(`BPM v${VERSION}\nMade by Daniel Bulant`);
 }
 
 switch(args.contents[0]){
-    case "i":
-    case "install":
-        console.warn("To be done");
-        break;
     case "get":
     case "info":
-        pkg.get(args.contents[1]).then(console.log);
+        pkg.get(args.contents[1]).catch(console.error);
         break;
     case "bin":
         console.log(__dirname);
         break;
+    case "i":
+    case "install":
     case "ls":
     case "help":
     case "ping":
