@@ -3,7 +3,9 @@ var console = new Console;
 
 module.exports = class PackageParser {
     load(path){
-        if (!fs.existsSync(path)) throw Error("Path doesn't exists!");
+        if(!path) path = process.cwd() + "/package.json";
+
+        if (!fs.existsSync(path)) throw Error("Package.json doesn't exists!");
 
         try {
             var json = JSON.parse(fs.readFileSync(path));
