@@ -27,6 +27,7 @@ var colors = {
 };
 
 class CustomConsole {
+    colors = colors;
     output(...args) {
         console.log(...args);
     }
