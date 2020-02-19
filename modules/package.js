@@ -2,8 +2,9 @@ const fs = require("fs");
 const path = require("path");
 const request = require("./requests");
 const Console = require("./console");
+const config = require("./config")();
 const console = new Console;
-const REPO = "https://registry.npmjs.org/";
+const REPO = config.repository;
 const Parser = require("./parser");
 var parser = new Parser;
 
@@ -101,6 +102,7 @@ module.exports = class Package {
     }
 
     install(flags, ...packages){
-
+        parser.load();
+        parser.install((flags.dev | false));
     }
 }
