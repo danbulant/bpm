@@ -3,7 +3,7 @@ const https = require("https");
 /**
  * @param {String} path
  */
-module.exports = (path) => {
+module.exports = (path, options = { method: "GET" }) => {
     return new Promise((res, rej) => {
         if(path.startsWith("http://")){
             var handler = http;
@@ -13,7 +13,7 @@ module.exports = (path) => {
             rej(Error("Unsupported protocol"));
         }
 
-        handler.get(path, (resp) => {
+        handler.get(path, options, (resp) => {
             let data = '';
 
             resp.on('data', (chunk) => {
