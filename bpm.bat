@@ -1,2 +1,2 @@
 @echo off
-node index.js --bat %*
+node %~dp0/index.js --bat %*
