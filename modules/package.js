@@ -61,6 +61,7 @@ module.exports = class Package {
             })
         });
     }
+
     ping(){
         return new Promise((res, rej) => {
             console.log(console.colors.FgMagenta + "HTTP PING" + console.colors.Reset + " " + REPO);
@@ -97,5 +98,9 @@ module.exports = class Package {
         var data = JSON.stringify(pkg, null, 2);
         fs.writeFileSync(process.cwd() + "/package.json", data);
         console.log("Done");
+    }
+
+    install(flags, ...packages){
+
     }
 }
