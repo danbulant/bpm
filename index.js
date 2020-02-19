@@ -5,6 +5,8 @@ var console = new Console;
 var pkg = new Package;
 const VERSION = "0.1"
 
+global.args = args;
+
 process.on('uncaughtException', function (err) {
     console.error("Uncaught exception:", err.message);
     console.error(err.stack);
@@ -35,6 +37,7 @@ switch(args.contents[0]){
         break;
     case "i":
     case "install":
+    case "peerInstall":
     case "ls":
     case "help":
     case "adduser":
