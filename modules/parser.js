@@ -25,7 +25,7 @@ module.exports = class PackageParser {
         var pkg = this.pkg;
         
         if(global.args.flags.supressChecking || global.args.flags.sch)return;
-        
+
         if(!pkg.name)console.warn("No name present in package.json");
         if(!pkg.description)console.warn("No description present in package.json")
         if(!pkg.repository)console.warn("Repository not specified")
@@ -40,14 +40,16 @@ module.exports = class PackageParser {
         
         Object.assign(deps, this.getDependencies());
         if(dev){
-            Object.assign(deps, this.getDependencies(true));
+            Object.assign(deps, this.getDependencies(true));//merge devDependencies & dependencies
         }
 
         for(var peer in this.getPeerDependencies()){
             console.warn("Peer dependency found. Install peer dependencies yourself: " + peer);
         }
 
+        console.time("installation time");
 
+        
     }
     
     getName(){
