@@ -32,6 +32,9 @@ class CustomConsole {
     width = process.stdout.columns | 999;
     height = process.stdout.rows | 999;
 
+    time(...args){
+        return console.time(...args);
+    }
     outputArray(arr, empty = "None") {
         if(!Array.isArray(arr))throw Error("Cannot convert non-array to array");
 
