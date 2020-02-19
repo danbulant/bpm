@@ -1,6 +1,7 @@
 const fs = require("fs");
 const request = require("./requests");
-
+const Console = require("./console");
+const console = new Console;
 const REPO = "https://registry.npmjs.org/";
 
 module.exports = class Package {
@@ -24,14 +25,16 @@ module.exports = class Package {
         return new Promise((res, rej) => {
             if(!pkg)return rej("No package name given");
 
-            request(REPO + pkg + "/").then((res) => {
-                var o = JSON.parse(res);
+            request(REPO + pkg + "/").then((r) => {
+                var o = JSON.parse(r);
                 if(o.error == "Not found"){
                     console.log("The package providen couldn't be found on the NPM repository");
                     return rej(404);
                 }
-
-                res("found");
+                
+                console.log(o.name);
+                console.log(console.colors.Dim + o.description + console.colors.Reset);
+                res();
             }).catch(e => {
                 console.warn(e);
                 rej(e);
