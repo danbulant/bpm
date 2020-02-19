@@ -28,12 +28,33 @@ module.exports = class Package {
             request(REPO + pkg + "/").then((r) => {
                 var o = JSON.parse(r);
                 if(o.error == "Not found"){
-                    console.log("The package providen couldn't be found on the NPM repository");
-                    return rej(404);
+                    return rej("The package providen couldn't be found on the NPM repository");
                 }
                 
-                console.log(o.name);
-                console.log(console.colors.Dim + o.description + console.colors.Reset);
+                var cyan = console.colors.FgCyan;
+                var magenta = console.colors.FgMagenta;
+                var yellow = console.colors.FgYellow;
+                var reset = console.colors.Reset;
+                
+                var length = 0;
+                var dependencies = [];
+                for (var dependency in o.versions[o["dist-tags"].latest].dependencies){
+                    dependencies[length] = yellow + dependency + reset + "@" + magenta + o.versions[o["dist-tags"].latest].dependencies[dependency] + reset;
+                    length++;
+                };
+
+                console.output("\n" + cyan + o.name + reset + " | " + magenta + o.license + reset + " | dependencies: " + cyan + (length) +  reset);
+                console.output(o.description);
+                console.output(yellow + o.homepage + reset);
+                console.output("");
+                console.output("Latest release: " + cyan + o["dist-tags"].latest + reset);
+                
+                console.output(yellow + "\nMaintainers:" + reset);
+                o.maintainers.forEach(m => {
+                    console.output(" -" + cyan + m.name + " " + magenta + m.email + reset);
+                })
+
+                console.output("");
                 res();
             }).catch(e => {
                 console.warn(e);
