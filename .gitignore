@@ -1,3 +1,7 @@
+# BPM data
+packages
+packages/*/
+
 # Logs
 logs
 *.log
