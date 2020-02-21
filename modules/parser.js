@@ -6,10 +6,36 @@ const path = require("path");
 const http = require("http");
 const https = require("https");
 const targz = require('targz');
+const { spawn } = require('child_process');
 const config = require("./config")();
 var console = new Console;
 
 module.exports = class PackageParser {
+    start(script){
+        if(!this.pkg.scripts)throw Error("No scripts are defined");
+
+        if(!this.pkg.scripts[script])throw Error("The script `" + script + "` is not defined in package.json");
+
+        console.output("");
+        console.output(" > " + this.pkg.scripts[script]);
+        console.output("");
+
+        var scr = this.pkg.scripts[script].split(" ");
+        const child = spawn(scr.shift(), scr, { stdio: "inherit" });
+
+        child.on('close', (code) => {
+            console.output("");
+            if(code){
+                console.error("Script exited with code " + code + ".");
+                console.error("This is not a problem with BPM, there's likely output above.");
+                console.error("");
+                console.error("Failed at `" + script + "` script of " + this.pkg.name);
+            } else {
+                console.log("Done, process exited with code 0.");
+            }
+        });
+    }
+
     load(path){
         if(!path) path = process.cwd() + "/package.json";
 

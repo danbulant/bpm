@@ -109,6 +109,10 @@ module.exports = class Package {
     }
 
     run(args){
+        var script = args.contents[0];
+        if(script == "run")script = args.contents[1];
         
+        parser.load();
+        parser.start(script);
     }
 }
