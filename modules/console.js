@@ -35,6 +35,9 @@ class CustomConsole {
     time(...args){
         return console.time(...args);
     }
+    timeEnd(...args){
+        return console.timeEnd(...args);
+    }
     outputArray(arr, empty = "None") {
         if(!Array.isArray(arr))throw Error("Cannot convert non-array to array");
 
