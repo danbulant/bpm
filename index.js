@@ -42,6 +42,10 @@ switch(args.contents[0]){
         args.contents.splice(0,1);
         pkg.install(args.flags, args.contents);
         break;
+    case "run":
+    case "run-script":
+        pkg.run(args);
+        break;
     case "ls":
     case "help":
     case "adduser":
@@ -74,8 +78,6 @@ switch(args.contents[0]){
     case "repo":
     case "restart":
     case "root":
-    case "run":
-    case "run-script":
     case "search":
     case "shrinkwrap":
     case "star":

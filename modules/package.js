@@ -107,4 +107,8 @@ module.exports = class Package {
         parser.install((flags.dev | false));
         parser.saveChanges();
     }
+
+    run(args){
+        
+    }
 }
