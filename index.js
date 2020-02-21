@@ -42,6 +42,8 @@ switch(args.contents[0]){
         args.contents.splice(0,1);
         pkg.install(args.flags, args.contents);
         break;
+    case "start":
+    case "test":
     case "run":
     case "run-script":
         pkg.run(args);
@@ -82,10 +84,8 @@ switch(args.contents[0]){
     case "shrinkwrap":
     case "star":
     case "stars":
-    case "start":
     case "stop":
     case "team":
-    case "test":
     case "uninstall":
     case "remove":
     case "unpublish":
