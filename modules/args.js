@@ -37,7 +37,7 @@ con.forEach((a, i) => {
     if(a.type == "flag"){
         var next = con[i + 1];
         if(next){
-            if(next.type == "content"){
+            if (next.type == "content" && a.variant == "long"){
                 skipNext = true;
                 return flags[a.content] = next.content;
             }
@@ -47,6 +47,8 @@ con.forEach((a, i) => {
     contents.push(a.content);
 });
 
+global.flags = flags;
+global.contents = contents;
 module.exports = {
     args: con,
     flags,
