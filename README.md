@@ -29,7 +29,8 @@ Currently supported and working commands are:
 * `bin` - Shows installation path of BPM
 * `ping` - Does HTTP ping to NPM's registry. Note this is different from NPM ping, so it cannot be compared.
 * `init` - Creates a default `package.json` in current working directory.
-
+* `install` - (`i` for short) installs packages from `package.json` and/or adds packages to dependencies.
+* `run-script` - (`run`, `start` or `test`) starts script from `package.json` scripts property. Only simple scripts are currently supported(as it uses Node's `process_child.spawn`).
 
 ## Hide package.json warnings
 
