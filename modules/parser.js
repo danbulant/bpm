@@ -1,4 +1,11 @@
 const Console = require("./console");
+const fs = require("fs");
+const request = require("./requests");
+const semver = require("semver");
+const path = require("path");
+const http = require("http");
+const https = require("https");
+const targz = require('targz');
 const config = require("./config")();
 var console = new Console;
 
@@ -35,23 +42,177 @@ module.exports = class PackageParser {
         if(!pkg.keywords)console.warn("Add keywords to your package.json");
     }
 
-    install(dev = false){
+    async install(dev = false) {
         var deps = {};
-        
+
         Object.assign(deps, this.getDependencies());
-        if(dev){
+        if (dev) {
             Object.assign(deps, this.getDependencies(true));//merge devDependencies & dependencies
         }
 
-        for(var peer in this.getPeerDependencies()){
+        var dependencies = [];
+
+        for (var peer in this.getPeerDependencies()) {
             console.warn("Peer dependency found. Install peer dependencies yourself: " + peer);
         }
 
-        console.time("installation time");
 
-        
+        for (var dep in deps) {
+            dependencies.push({
+                name: dep,
+                version: deps[dep],
+                type: "required"
+            })
+        }
+
+        var optional = this.getOptionalDependencies();
+
+        if (global.flags["no-optional"]) optional = {};
+
+        for (var dep in optional) {
+            dependencies.push({
+                name: dep,
+                version: optional[dep],
+                type: "optional"
+            });
+        }
+
+        dependencies.forEach((dep) => {
+            this.installDependency(dep.name, dep.version);
+        })
     }
     
+    sanitizeName(pkg, version){
+        var targetPath = '.' + path.posix.normalize('/' + pkg)
+        return path.posix.resolve(config.packages + "/../packages/", targetPath + "/" + version)
+    }
+
+    installDependency(pkg, version) {
+        return new Promise(async(res, rej)=>{
+
+            console.time("installation time of " + pkg);
+            
+            var lock = {};
+            lock.version = 1;
+            
+            lock.packages = {};
+
+
+            var deps = await this.getRequiredPackages(pkg, version);
+            var pk = deps.pkg;
+
+            if (fs.existsSync(this.sanitizeName(pk.name, deps.version))) {
+                console.log("Already installed in " + this.sanitizeName(pk.name, deps.version));
+
+                if (!fs.existsSync(process.cwd() + "/node_modules")) {
+                    fs.mkdirSync(process.cwd() + "/node_modules");
+                }
+
+                if (!fs.existsSync(process.cwd() + "/node_modules/" + pk.name)) {
+                    if (path.dirname(process.cwd() + "/node_modules/" + pk.name) != process.cwd() + "/node_modules/") {
+                        if (!fs.existsSync(path.dirname(process.cwd() + "/node_modules/" + pk.name)))
+                            fs.mkdirSync(path.dirname(process.cwd() + "/node_modules/" + pk.name));
+                    }
+
+                    console.log("Creating symlink");
+                    fs.symlinkSync(path.relative(process.cwd() + "/node_modules/" + pk.name, this.sanitizeName(pk.name, deps.version)), process.cwd() + "/node_modules/" + pk.name);
+                }
+
+                if(!global.flags.f && !global.flags["force-install"]){
+                    console.timeEnd("installation time of " + pkg);
+                    return res();
+                }
+            }
+            
+            var d = deps.deps;
+            if(d){
+                for(var v in d){
+                    await this.installDependency(v, d[v]);
+                }
+            }
+            
+            if (!fs.existsSync(this.sanitizeName(pk.name, deps.version))) {
+                //download
+                console.log("Downloading " + pk.name + " from " + pk.dist.tarball + " to " + __dirname + "/../tars/" + path.basename(pk.dist.tarball));
+                await this.download(pk.dist.tarball, __dirname + "/../tars/" + path.basename(pk.dist.tarball));
+
+                targz.decompress({
+                    src: __dirname + "/../tars/" + path.basename(pk.dist.tarball),
+                    dest: this.sanitizeName(pk.name, deps.version)
+                }, (e) => {
+                    if(e)throw e;
+                    
+                    console.timeEnd("installation time of " + pkg);
+                    res();
+                })
+            } else {
+                console.timeEnd("installation time of " + pkg);
+                res();
+            }
+        })
+    }
+    download(from, to){
+        return new Promise((res, rej)=>{
+            
+            if(fs.existsSync(to)){
+                return res();
+            }
+
+            if (from.startsWith("http://")) {
+                var handler = http;
+            } else if (from.startsWith("https://")) {
+                var handler = https;
+            } else {
+                throw Error("Unsupported protocol");
+            }
+            const file = fs.createWriteStream(to);
+
+            handler.get(from, (response) => {
+                if (response.statusCode != 200) {
+                    throw Error("Got status code " + response.statusCode);
+                }
+
+                response.pipe(file);
+
+                response.on('end', ()=>{
+                    file.close();
+                    if(!response.complete) throw Error("Couldn't download whole file");
+                    res();
+                })
+            });
+        });
+    }
+    getRequiredPackages(pkg, version){
+        return new Promise((res, rej)=>{
+            request(global.config.repository + pkg).then((o) => {
+                var p = JSON.parse(o);
+                if(p.error)return rej("Requested package couldn't be found.");
+
+                var versions = [];
+
+                for(var v in p.versions){
+                    versions.push(v);
+                }
+
+                versions = versions.filter((val) => {
+                    return semver.satisfies(val, version);
+                });
+
+                var ver = versions[versions.length - 1];
+                if(!ver){
+                    throw Error("Cannot install - no supported version for package " + pkg + " that satisfies `" + version + "`");
+                }
+
+                res({
+                    deps: p.versions[ver].dependencies,
+                    version: ver,
+                    pkg: p.versions[ver]
+                });
+            }).catch(rej);
+        })
+    }
+
+
     getName(){
         if(this.pkg.name)return this.pkg.name;
         throw Error("Name isn't specified in the package.json");
