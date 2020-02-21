@@ -38,7 +38,8 @@ switch(args.contents[0]){
     case "i":
     case "install":
     case "peerInstall":
-        args.contents.splice(0, 1)
+    case "optionalInstall":
+        args.contents.splice(0,1);
         pkg.install(args.flags, args.contents);
         break;
     case "ls":
