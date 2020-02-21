@@ -10,7 +10,7 @@ module.exports = (path, options = { method: "GET" }) => {
         } else if(path.startsWith("https://")){
             var handler = https;
         } else {
-            rej(Error("Unsupported protocol"));
+            return rej(Error("Unsupported protocol"));
         }
 
         handler.get(path, options, (resp) => {
