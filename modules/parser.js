@@ -21,11 +21,51 @@ module.exports = class PackageParser {
             throw Error("Invalid JSON file");
         }
 
+        this.path = path;
         this.pkg = json;
 
         this.verify();
 
         return json;
+    }
+
+    async addDependencies(deps){
+        if(!deps)return;
+
+        for(var i = 0; i < deps.length; i++){
+            var depi = deps[i].split(/[a-z]@/gi);
+            var dep = depi[0];
+            var version = depi[1] || null;
+
+            try {
+                var pkg = JSON.parse(await request(global.config.repository + dep));
+            } catch(e){
+                console.error("An error occured during parsing information");
+            }
+
+            if(pkg.error)throw Error(pkg.error);
+
+            if (!pkg["dist-tags"]) {
+                console.warn("Couldn't install " + deps[i] + " - no published version");
+                continue;
+            }
+            if (!pkg["dist-tags"].latest) {
+                console.warn("Couldn't install " + deps[i] + " - no published version");
+                continue;
+            }
+
+            if(!this.pkg.dependencies)this.pkg.dependencies = {};
+
+            if(!version){
+                this.pkg.dependencies[dep] = "^" + pkg["dist-tags"].latest;
+            } else {
+                this.pkg.dependencies[dep] = version;
+            }
+        }
+    }
+
+    saveChanges(){
+        return fs.writeFileSync(this.path, JSON.stringify(this.pkg, null, 2) + "\n");
     }
 
     verify(){
@@ -114,7 +154,7 @@ module.exports = class PackageParser {
                             fs.mkdirSync(path.dirname(process.cwd() + "/node_modules/" + pk.name));
                     }
 
-                    console.log("Creating symlink");
+                    //console.log("Creating symlink");
                     fs.symlinkSync(path.relative(process.cwd() + "/node_modules/" + pk.name, this.sanitizeName(pk.name, deps.version)), process.cwd() + "/node_modules/" + pk.name);
                 }
 

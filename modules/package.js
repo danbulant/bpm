@@ -101,8 +101,10 @@ module.exports = class Package {
         console.log("Done");
     }
 
-    install(flags, ...packages){
+    async install(flags, packages){
         parser.load();
+        await parser.addDependencies(packages);
         parser.install((flags.dev | false));
+        parser.saveChanges();
     }
 }
