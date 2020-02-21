@@ -1,6 +1,8 @@
 # BPM data
 packages
 packages/*/
+tars
+node_modules
 
 # Logs
 logs
