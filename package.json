@@ -1,0 +1,27 @@
+{
+  "name": "bpm",
+  "version": "1.0.0",
+  "description": "Better package manager.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danbulant/bpm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danbulant/bpm/issues"
+  },
+  "homepage": "https://github.com/danbulant/bpm#readme",
+  "dependencies": {
+    "semver": "^7.1.3",
+    "targz": "^1.0.1"
+  }
+}
